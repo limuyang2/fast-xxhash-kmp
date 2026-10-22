@@ -1,7 +1,7 @@
 package io.github.limuyang2.xxhash.lib
 
 /**
- * Multiplatform wrapper for xxHash library (v0.8.3).
+ * Multiplatform wrapper for xxHash library (v0.8.4).
  *
  * Provides one-shot hash functions: XXH32, XXH64, XXH3-64, XXH3-128.
  */
