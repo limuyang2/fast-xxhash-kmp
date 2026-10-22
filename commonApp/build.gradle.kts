@@ -14,7 +14,7 @@ kotlin {
 
     android {
         namespace = "io.github.limuyang2.xxhash.demo.common"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 23
 
         compilerOptions {

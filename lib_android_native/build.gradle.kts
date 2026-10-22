@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "io.github.limuyang2.xxhash.lib.internal"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 21

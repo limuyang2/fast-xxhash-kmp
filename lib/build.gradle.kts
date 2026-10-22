@@ -81,7 +81,7 @@ kotlin {
 
     android {
         namespace = "io.github.limuyang2.xxhash.lib"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 21
 
         withHostTest {}
