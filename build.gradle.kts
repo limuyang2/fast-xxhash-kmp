@@ -9,17 +9,20 @@ plugins {
 }
 
 val publicationVersion = providers.gradleProperty("XXHASH_VERSION").get()
+val nativeVersion = providers.gradleProperty("XXHASH_NATIVE_VERSION").get()
 
 tasks.register("prepareMavenCentralPublication") {
     group = "publishing"
     description = "本地生成全部 POM、源码及文档 JAR，不签名、不上传"
     dependsOn(":lib:prepareMavenCentralPublication")
+    dependsOn(":lib_android_native:prepareMavenCentralPublication")
 }
 
 tasks.register("stageMavenCentralPublication") {
     group = "publishing"
     description = "构建、签名全部组件并发布到本地 RepoDir，不上传"
     dependsOn(":lib:publishAllPublicationsToCentralStagingRepository")
+    dependsOn(":lib_android_native:publishReleasePublicationToCentralStagingRepository")
 }
 
 val bundleMavenCentral = tasks.register<Zip>("bundleMavenCentral") {
@@ -34,6 +37,7 @@ val bundleMavenCentral = tasks.register<Zip>("bundleMavenCentral") {
     isReproducibleFileOrder = true
     from(layout.projectDirectory.dir("RepoDir"))
     include("io/**/$publicationVersion/**")
+    include("io/**/$nativeVersion/**")
     exclude("**/maven-metadata.xml*")
 }
 

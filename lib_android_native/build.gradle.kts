@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.Properties
@@ -35,6 +36,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
@@ -62,7 +64,7 @@ if (localProperties.exists()) {
     println("No props file, loading env vars")
 }
 
-val versionName = "1.0.1"
+val versionName = providers.gradleProperty("XXHASH_NATIVE_VERSION").get()
 
 group = "io.github.limuyang2"
 version = versionName
@@ -107,10 +109,18 @@ afterEvaluate {
 
         repositories {
             maven {
+                name = "CentralStaging"
                 setUrl("$rootDir/RepoDir")
             }
         }
     }
+}
+
+tasks.register("prepareMavenCentralPublication") {
+    group = "publishing"
+    description = "Generate POM, sources and javadoc jars locally without signing or uploading"
+    dependsOn(tasks.withType<GenerateMavenPom>())
+    dependsOn("sourceReleaseJar", "javaDocReleaseJar")
 }
 
 gradle.taskGraph.whenReady {
