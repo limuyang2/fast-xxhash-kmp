@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -174,7 +175,7 @@ kotlin {
 
 //---------- maven upload info -----------------------------------
 
-val versionName = "2.0.1"
+val versionName = providers.gradleProperty("XXHASH_VERSION").get()
 
 var signingKeyId = "" //签名的密钥后8位
 var signingPassword = "" //签名设置的密码
@@ -199,18 +200,13 @@ if (localProperties.exists()) {
 group = "io.github.limuyang2"
 version = versionName
 
-val emptyJavadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-    description = "Assembles an empty javadoc jar required by Maven Central validation."
-}
-
 val publishWebPublicationsToRepo = tasks.register("publishWebPublicationsToRepo") {
     group = "publishing"
     description = "Publish Kotlin Multiplatform metadata plus JS/WasmJS artifacts to the configured Maven repository."
     dependsOn(
-        "publishKotlinMultiplatformPublicationToMavenRepository",
-        "publishJsPublicationToMavenRepository",
-        "publishWasmJsPublicationToMavenRepository",
+        "publishKotlinMultiplatformPublicationToCentralStagingRepository",
+        "publishJsPublicationToCentralStagingRepository",
+        "publishWasmJsPublicationToCentralStagingRepository",
     )
 }
 
@@ -229,17 +225,26 @@ publishing {
         groupId = "io.github.limuyang2"
         version = versionName
 
-
         artifactId = when (name) {
             "kotlinMultiplatform" -> "xxhash"
             "android" -> "xxhash-android"
-            "jvm" -> "xxhash-jvm".apply { artifact(emptyJavadocJar) }
+            "jvm" -> "xxhash-jvm"
             "js" -> "xxhash-js"
             "wasmJs" -> "xxhash-wasm-js"
             "iosArm64" -> "xxhash-ios-arm64"
             "iosSimulatorArm64" -> "xxhash-ios-simulator-arm64"
             else -> artifactId
         }
+
+        // Central 校验要求每个构件都带 javadoc jar；用 README + LICENSE 填充。
+        // 每个 publication 独立成 jar，避免多个 Sign 任务共享同一 .asc 输出。
+        val centralJavadocJar = tasks.register<Jar>("${name}CentralJavadocJar") {
+            archiveBaseName.set("${project.name}-$name")
+            archiveClassifier.set("javadoc")
+            from(rootProject.projectDir.resolve("README.md"))
+            from(rootProject.projectDir.resolve("LICENSE"))
+        }
+        artifact(centralJavadocJar)
 
         pom {
             name.value("xxhash")
@@ -271,10 +276,18 @@ publishing {
 
     repositories {
         maven {
-            name = "Maven"
+            name = "CentralStaging"
             setUrl("$rootDir/RepoDir")
         }
     }
+}
+
+tasks.register("prepareMavenCentralPublication") {
+    group = "publishing"
+    description = "Generate POMs, sources and javadoc jars locally without signing or uploading"
+    dependsOn(tasks.withType<GenerateMavenPom>())
+    dependsOn(tasks.matching { it.name.endsWith("CentralJavadocJar") })
+    dependsOn(tasks.matching { it.name.endsWith("SourcesJar", ignoreCase = true) })
 }
 
 gradle.taskGraph.whenReady {
