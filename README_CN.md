@@ -23,7 +23,7 @@
 - JVM：基于 `org.lz4:lz4-java` 和 `net.openhft:zero-allocation-hashing`
 - Web：使用 `lib/src/webMain/kotlin/io/github/limuyang2/xxhash/lib` 下纯 Kotlin 自行实现的版本
 
-也就是说，公开 API 是一致的，但JVM、Web实现并不完全相同。
+也就是说，公开 API 在各平台保持一致；不同的是各平台的后端实现（JVM、Web 并未直接调用 C 源码），但哈希输出结果在所有平台上完全一致。
 
 ## 引入方式
 

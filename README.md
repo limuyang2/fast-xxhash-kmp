@@ -25,7 +25,7 @@ The core library is in `:lib`. This repository also includes demo apps for Andro
 - JVM: JVM-side implementation backed by `org.lz4:lz4-java` and `net.openhft:zero-allocation-hashing`
 - Web: pure Kotlin implementation in `lib/src/webMain/kotlin/io/github/limuyang2/xxhash/lib`
 
-The public API is consistent, but the JVM and Web implementations are not exactly the same.
+The public API is identical across all platforms. What differs is only the backend implementation (JVM and Web do not call the C sources directly); the hash outputs are exactly the same on every platform.
 
 ## Installation
 
