@@ -22,6 +22,8 @@ kotlin {
         }
     }
 
+    jvm()
+
     js {
         browser()
     }
@@ -53,5 +55,15 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
         }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "io.github.limuyang2.xxhash.demo.MainKt"
     }
 }
